@@ -1,42 +1,67 @@
-const { responsem, request } = require('express');
+const { response, request } = require('express');
+const bcrypt = require('bcryptjs');
+
+const User = require('../models/users');
 
 
-const usersGet = (req = request, res = response) => {     
-    const { name, apikey, page = 1, limit = 10 } = req.query;
+
+const usersGet = async(req = request, res = response) => {     
+    const { limit = 5, from = 0 } = req.query
+
+    const filterQuery = { status: true };
+
+    const [ total, users ] = await Promise.all([
+        User.countDocuments(filterQuery),
+        User.find(filterQuery).skip( from ).limit( limit )
+    ]);
     
     res.json({
-        msg: 'API get - From Controller',
-        name,
-        apikey,
-        page,
-        limit
+        total, 
+        users
     });
 }
 
-const usersPost = (req, res = response) => {
+const usersPost = async(req, res = response) => {
+    const { name, email, password, role  } = req.body;
+    const user = new User( {
+        name, email, password, role
+    } );
 
-    const { name, age } = req.body;
+    // Password hash
+    const salt = bcrypt.genSaltSync();
+    user.password = bcrypt.hashSync( password, salt );
 
-    res.status(201).json({
-        msg: 'API post - From Controller',
-        name,
-        age
-    });
+    // Store in DB
+    await user.save();
+
+    res.status(201).json(user);
 };
 
-const usersPut = (req, res = response) => {
+const usersPut = async(req, res = response) => {
+    const { id } = req.params;
 
-    const { id }= req.params;
+    const { _id, password, google, ...rest } = req.body;
 
-    res.status(400).json({
-        msg: 'API put - From Controller',
-        id
-    });
+    // TODO Validar in database
+    if( password ) {
+        const salt = bcrypt.genSaltSync();
+        rest.password = bcrypt.hashSync( password, salt );
+    }
+
+    const user = await User.findByIdAndUpdate( id, rest );
+
+    res.status(400).json(user);
 }
 
-const usersDelete = (req, res = response) => {
+const usersDelete = async(req, res = response) => {
+    const { id } = req.params;
+
+    const user = await User.findByIdAndUpdate( id, { status: false } );
+
+
+
     res.json({
-        msg: 'API delete - From Controller'
+        user
     });
 }
 
