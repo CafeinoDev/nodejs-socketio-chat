@@ -56,13 +56,9 @@ const usersPut = async(req, res = response) => {
 const usersDelete = async(req, res = response) => {
     const { id } = req.params;
 
-    const user = await User.findByIdAndUpdate( id, { status: false } );
+    const userToDelete = await User.findByIdAndUpdate( id, { status: false } );
 
-
-
-    res.json({
-        user
-    });
+    res.json(userToDelete);
 }
 
 const usersPatch = (req, res = response) => {
