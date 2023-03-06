@@ -1,9 +1,9 @@
-const { response } = require("express");
+const { response, request } = require("express");
 const bcrypt = require("bcryptjs");
 
 const User = require('../models/users');
 const { generateJWT } = require("../helpers/generate-jwt");
-
+const { googleVerify } = require("../helpers/google-verify");
 
 const login = async(req, res = response) => {
 
@@ -53,6 +53,54 @@ const login = async(req, res = response) => {
 
 }
 
+const googleSignIn = async(req = request, res = response) => {
+
+    const { id_token } = req.body;
+
+    try {
+        const { email, name, picture } = await googleVerify(id_token);
+        
+        let user = await User.findOne({ email });
+
+        if( !user ){
+            const data = {
+                name,
+                email,
+                password: ':)',
+                img: picture,
+                google: true
+            };
+
+            user = new User( data );
+
+            user.save();
+        }
+
+        if ( !user.status ){
+            return res.status(401).json({
+                msg: 'User status false'
+            });
+        }
+
+        // Generate JWT
+        const token = await generateJWT( user.id );
+
+        res.json({
+            user,
+            token
+        });
+    }catch(err){
+        json.status(400).json({
+            msg: 'Google token unrecognized'
+        })
+    }
+
+
+    
+}
+
+
 module.exports = {
-    login
+    googleSignIn,
+    login,
 }

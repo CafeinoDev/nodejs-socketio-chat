@@ -4,11 +4,48 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Denied</title>
+    <title>Google Sign In</title>
 </head>
 <body>
     
-    <h1>Access denied</h1>
+    <h1>Google Sign In</h1>
     
+
+    <script>
+        
+        function handleCredentialResponse(response) {
+            let url = `${ window.location.href }api/auth/google`;
+            let data = { id_token: response.credential };
+
+            console.log(response.credential);
+            fetch( url, {
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            }).then( resp => resp.json() )
+            .then( data => console.log('Data response: ', data) )
+            .catch( console.log );
+        }
+
+
+        window.onload = function () {
+          google.accounts.id.initialize({
+            client_id: "1095408186316-aitrmboodl58qporkoqecmselopq2e14.apps.googleusercontent.com",
+            callback: handleCredentialResponse
+          });
+
+          google.accounts.id.renderButton(
+            document.getElementById("buttonDiv"),
+            { theme: "outline", size: "large" }  // customization attributes
+          );
+          google.accounts.id.prompt(); // also display the One Tap dialog
+        }
+    </script>
+    <div id="buttonDiv"></div> 
+
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>
