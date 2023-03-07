@@ -73,7 +73,7 @@ const googleSignIn = async(req = request, res = response) => {
 
             user = new User( data );
 
-            user.save();
+            await user.save();
         }
 
         if ( !user.status ){
@@ -95,8 +95,6 @@ const googleSignIn = async(req = request, res = response) => {
         })
     }
 
-
-    
 }
 
 
