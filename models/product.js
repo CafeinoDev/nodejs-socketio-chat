@@ -16,7 +16,7 @@ const ProductSchema = Schema({
         ref: 'User',
         required: true
     },
-    pryce: {
+    price: {
         type: Number,
         default: 0,
     },
@@ -31,10 +31,13 @@ const ProductSchema = Schema({
     stock: {
         type: Boolean,
         default: true
+    },
+    img: {
+        type: String,
     }
 });
 
-ProductSchema.methos.toJSON = function() {
+ProductSchema.methods.toJSON = function() {
     const { __v, status, ...data } = this.toObject();
 
     return data;

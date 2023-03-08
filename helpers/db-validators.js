@@ -1,4 +1,4 @@
-const { Category, Role, User } = require('../models');
+const { Category, Role, User, Product } = require('../models');
 
 const validateRole = async(role = '') => {
     const roleExist = await Role.findOne({ role });
@@ -40,10 +40,41 @@ const categoryExistsByName = async( name ) => {
     }
 }
 
+const productExistByName = async( name ) => {
+    const productExists = await Product.findOne({ name: name.toUpperCase() });
+
+    if( productExists ){
+        throw new Error(`Product ${ name } already exists`);
+    }
+}
+
+const productExistById = async( id ) => {
+    const productExists = await Product.findById( id );
+
+    if( !productExists ){
+        throw new Error(`The product with id ${ id } doesn\'t exists`)
+    }
+}
+
+const allowedCollections= ( collection = '', allowedCollections = [] ) => {
+
+    const included = allowedCollections.includes( collection );
+
+    if( !included ) {
+        throw new Error(`The collection ${ collection } is not allowed. Must be: ${ allowedCollections }`)
+    }
+
+    return true;
+
+}
+
 module.exports = {
+    allowedCollections,
     categoryExistById,
     categoryExistsByName,
     emailExists,
     userExistById,
     validateRole,
+    productExistByName,
+    productExistById
 }
